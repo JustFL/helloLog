@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!--
+        <property name="" value="" /> 配置文件的通用属性
+        使用${name}可取得value的值 方便后续进行引用
+    -->
+    <property name="IPX" value="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} %c %M %L %thread - %m%n"></property>
+    <property name="IPZ" value="logs"></property>
+
+    <!--~~~~~~~~~~~~~~~~~~~-->
+    <!--   控制台Appender  -->
+    <!--~~~~~~~~~~~~~~~~~~~-->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <!--
+            表示对日志输出目标的配置
+            默认 System.out 表示以黑色字体输出日志
+            设置 System.err 表示以红色字体输出日志
+        -->
+        <target>
+            System.err
+        </target>
+
+        <!-- 引用property属性值配置日志格式 -->
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${IPX}</pattern>
+        </encoder>
+
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <appender name="console-new" class="ch.qos.logback.core.ConsoleAppender">
+        <target>
+            System.out
+        </target>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${IPX}</pattern>
+        </encoder>
+    </appender>
+
+    <!--~~~~~~~~~~~~~~~~~-->
+    <!--   文件Appender  -->
+    <!--~~~~~~~~~~~~~~~~~-->
+    <appender name="file" class="ch.qos.logback.core.FileAppender">
+        <file>${IPZ}/logback-file.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${IPX}</pattern>
+        </encoder>
+    </appender>
+
+
+
+    <!--~~~~~~~~~~~~~~~~~-->
+    <!--可拆分归档Appender-->
+    <!--~~~~~~~~~~~~~~~~~-->
+    <appender name="roll" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+        <encoder charset="UTF-8">
+            <pattern>${IPX}</pattern>
+        </encoder>
+        <!-- 输出文件路径+文件名 -->
+        <file>${IPZ}/logback-roll.log</file>
+
+        <!-- 指定拆分归档规则 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 按照时间申明文件名称 压缩格式为gz -->
+            <fileNamePattern>${IPZ}/roll.%d{yyyy-MM-dd}.log%i.gz</fileNamePattern>
+            <!-- 按照文件大小拆分 -->
+            <maxFileSize>1KB</maxFileSize>
+        </rollingPolicy>
+    </appender>
+
+
+
+
+    <!--~~~~~~~~~~~~~~~-->
+    <!--    异步日志    -->
+    <!--~~~~~~~~~~~~~~~-->
+    <!-- 启动单独线程来处理日志 不影响正常业务 -->
+    <appender name="async" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="console-new"/>-
+    </appender>
+
+    <!-- 日志记录器 -->
+    <root level="ALL">
+        <!-- 记录器绑定Appender -->
+        <appender-ref ref="console"/>
+        <appender-ref ref="file"/>
+        <appender-ref ref="roll"/>
+    </root>
+
+
+    <!-- 自定义日志记录器 -->
+    <Logger name="com.javbus" level="INFO" additivity="false">
+        <appender-ref ref="async"/>
+    </Logger>
+
+</configuration>
